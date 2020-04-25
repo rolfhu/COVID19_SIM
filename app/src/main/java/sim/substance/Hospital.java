@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import sim.app.HospitalMgr;
 import sim.tags.ITagHost;
 import sim.tags.TagBase;
 import sim.tags.Tags;
@@ -82,7 +83,11 @@ public class Hospital implements ITagHost {
         {
             return false;
         }
-        return true;
+        if(HospitalMgr.getInstance().m_IntoHospitalStrategy.checkPatient(this, patient))
+        {
+            return true;
+        }
+        return false;
     }
 
     public void removePatient(Patient patient)

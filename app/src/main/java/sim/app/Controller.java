@@ -2,6 +2,8 @@ package sim.app;
 
 import android.util.Log;
 
+import sim.strategy.hospital.IntoHospitalAll;
+import sim.strategy.hospital.IntoHospitalNormal;
 import sim.substance.Population;
 
 public class Controller {
@@ -36,10 +38,16 @@ public class Controller {
     {
         m_nSimDays++;
         //模拟感染的过程，更新各种人群的人数
-        if (m_nSimDays<=150)
+        if (m_nSimDays<=100)
         {
             //某个时刻停止传染，用于查看长期死亡率
             infectPopulations();
+        }
+
+        if (m_nSimDays==80)
+        {
+            //开始应收尽收
+            HospitalMgr.getInstance().changeStrategy(new IntoHospitalAll());
         }
 
         //对被感染的个人计算病程

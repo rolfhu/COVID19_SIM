@@ -239,8 +239,9 @@ public class Population implements ITagHost {
 
     public void gotoHospital()
     {
-        gotoHospital(m_PatientSetOnset);
+        //先收重症入院
         gotoHospital(m_PatientSetIntensive);
+        gotoHospital(m_PatientSetOnset);
     }
 
     private void gotoHospital(Collection<Patient> patientList)
