@@ -1,6 +1,6 @@
 package sim.strategy;
 
-public class StrategyBase {
+public abstract class StrategyBase {
 
     private String m_strStrategyName = "";
 

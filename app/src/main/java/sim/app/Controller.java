@@ -31,6 +31,7 @@ public class Controller {
         AreaMgr.getInstance().init();
         HospitalMgr.getInstance().init();
         PatientMgr.getInstance().init();
+        PolicyMgr.getInstance().init();
 
         m_StartDate = FactoryMgr.getInstance().getFactory().m_StartDate;
     }
@@ -38,6 +39,13 @@ public class Controller {
     public int getSimDays()
     {
         return m_nSimDays;
+    }
+
+    //是否已经到达指定的日期
+    public boolean isDateReached(String strDate)
+    {
+        int nDate = getSimDaysByDate(strDate);
+        return getSimDays() >= nDate;
     }
 
     //根据日期（年-月-日）获取模拟的天数
@@ -71,6 +79,11 @@ public class Controller {
     public void runOneDay()
     {
         m_nSimDays++;
+
+        //每天初始化的部分
+        PolicyMgr.getInstance().onDayStart();
+
+
         //模拟感染的过程，更新各种人群的人数
         if (m_nSimDays<=100)
         {
@@ -78,11 +91,11 @@ public class Controller {
             infectPopulations();
         }
 
-        if (m_nSimDays==getSimDaysByDate("2020-2-5"))
-        {
-            //开始应收尽收
-            HospitalMgr.getInstance().changeStrategy(new IntoHospitalAll());
-        }
+//        if (m_nSimDays==getSimDaysByDate("2020-2-5"))
+//        {
+//            //开始应收尽收
+//            HospitalMgr.getInstance().changeStrategy(new IntoHospitalAll());
+//        }
 
         //对被感染的个人计算病程
         calcStages();

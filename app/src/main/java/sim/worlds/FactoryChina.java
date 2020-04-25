@@ -5,9 +5,11 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 
 import sim.area.Area;
+import sim.policy.PolicyBase;
 import sim.substance.Hospital;
 import sim.substance.Population;
 import sim.worlds.china.AreaInit;
+import sim.worlds.china.PolicyInit;
 import sim.worlds.china.PopulationInit;
 
 public class FactoryChina extends FactoryBase {
@@ -35,5 +37,10 @@ public class FactoryChina extends FactoryBase {
     @Override
     public void initHospitals(Collection<Hospital> hospitalList) {
         super.initHospitals(hospitalList);
+    }
+
+    @Override
+    public void initPolicy(Collection<PolicyBase> policySet) {
+        PolicyInit.initPolicys(policySet);
     }
 }

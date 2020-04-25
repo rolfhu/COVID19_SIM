@@ -6,6 +6,7 @@ import java.util.Collection;
 import sim.app.AreaMgr;
 import sim.app.ConstValues;
 import sim.area.Area;
+import sim.policy.PolicyBase;
 import sim.substance.AreaHospital;
 import sim.substance.Hospital;
 import sim.substance.Patient;
@@ -95,4 +96,5 @@ public abstract class FactoryBase {
         }
     }
 
+    public abstract void initPolicy(Collection<PolicyBase> policySet);
 }

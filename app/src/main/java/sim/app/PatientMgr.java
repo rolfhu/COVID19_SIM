@@ -9,7 +9,6 @@ import java.util.Iterator;
 import sim.area.Area;
 import sim.substance.Patient;
 import sim.substance.Population;
-import sim.tags.TagBase;
 import sim.tags.stage.DeadStage;
 import sim.tags.stage.ImmuneStage;
 import sim.tags.stage.IncubationStage;
