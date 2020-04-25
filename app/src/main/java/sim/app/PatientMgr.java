@@ -2,16 +2,14 @@ package sim.app;
 
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import sim.area.Area;
 import sim.substance.Patient;
 import sim.substance.Population;
 import sim.tags.TagBase;
-import sim.tags.area.Area;
 import sim.tags.stage.DeadStage;
 import sim.tags.stage.ImmuneStage;
 import sim.tags.stage.IncubationStage;
@@ -37,13 +35,13 @@ public class PatientMgr {
         return s_single;
     }
 
-    public void Init()
+    public void init()
     {
         //产生零号病人
-        TagBase areaTag = TagMgr.getInstance().findTagByFullName("湖北.武汉");
-        Collection<Population> pops = PopulationMgr.getInstance().getPopulationsByTag(areaTag);
-        Patient onePatient = PopulationMgr.getInstance().infectOnePopulation(pops);
-        m_PatientListIncubation.add(onePatient);
+        Area area = AreaMgr.getInstance().findAreaByFullName("湖北.武汉");
+        Collection<Population> pops = area.getPopulations();
+        Patient oneInfectPatient = PopulationMgr.getInstance().infectOnePopulation(pops);
+        m_PatientListIncubation.add(oneInfectPatient);
     }
 
     public void infectPopulations()
@@ -65,12 +63,12 @@ public class PatientMgr {
                 continue;
             }
             //先根据区域获取到本区域所有的人群列表
-            Area areaTag = onePatient.getAreaTag();
-            long lHealthyNum = areaTag.getAllPopulationHealthyNums();
-            long lIncubationNum = areaTag.getAllPopulationNumsByStage(IncubationStage.class);
-            long lOnsetNum = areaTag.getAllPopulationNumsByStage(OnsetStage.class);
-            long lIntensiveNum = areaTag.getAllPopulationNumsByStage(IntensiveStage.class);
-            long lImmuneNum = areaTag.getAllPopulationNumsByStage(ImmuneStage.class);
+            Area area = onePatient.getPopulation().getArea();
+            long lHealthyNum = area.getAllPopulationHealthyNums();
+            long lIncubationNum = area.getAllPopulationNumsByStage(IncubationStage.class);
+            long lOnsetNum = area.getAllPopulationNumsByStage(OnsetStage.class);
+            long lIntensiveNum = area.getAllPopulationNumsByStage(IntensiveStage.class);
+            long lImmuneNum = area.getAllPopulationNumsByStage(ImmuneStage.class);
 
             long lTotalNum = lHealthyNum+lIncubationNum+lOnsetNum+lIntensiveNum+lImmuneNum;
             float fInfectRate = (float)lHealthyNum/lTotalNum;
@@ -81,7 +79,7 @@ public class PatientMgr {
                 if (fRand < fInfectRate)
                 {
                     onePatient.m_InfectNum++;
-                    Collection<Population> pops = PopulationMgr.getInstance().getPopulationsByTag(areaTag);
+                    Collection<Population> pops = area.getPopulations();
                     Patient oneInfectPatient = PopulationMgr.getInstance().infectOnePopulation(pops);
                     m_PatientListIncubation.add(oneInfectPatient);
                 }
@@ -113,6 +111,7 @@ public class PatientMgr {
 
     private void addPatientToProperList(Patient onePatient)
     {
+        boolean bNeedLeaveHospital = false;
         Class classStage = onePatient.getStageTag().getClass();
         if (classStage == IncubationStage.class)
         {
@@ -128,11 +127,18 @@ public class PatientMgr {
         }
         else if (classStage == ImmuneStage.class)
         {
+            bNeedLeaveHospital = true;
             m_PatientListImmune.add(onePatient);
         }
         else if (classStage == DeadStage.class)
         {
+            bNeedLeaveHospital = true;
             m_PatientListDead.add(onePatient);
+        }
+
+        if (bNeedLeaveHospital)
+        {
+            onePatient.leaveHospital();
         }
     }
 

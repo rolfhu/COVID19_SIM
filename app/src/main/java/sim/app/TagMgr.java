@@ -1,18 +1,19 @@
 package sim.app;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import sim.tags.TagBase;
 import sim.tags.TagUtility;
-import sim.tags.Tags;
-import sim.tags.area.Area;
 import sim.tags.stage.DeadStage;
 import sim.tags.stage.ImmuneStage;
 import sim.tags.stage.IncubationStage;
 import sim.tags.stage.IntensiveStage;
 import sim.tags.stage.OnsetStage;
 import sim.tags.stage.Stage;
+import sim.worlds.FactoryMgr;
 
 //管理所有Tag之间的关系
 public class TagMgr {
@@ -29,28 +30,12 @@ public class TagMgr {
         return s_single;
     }
 
-    public void Init()
+    public void init()
     {
-        InitAreaTags();
-        InitStageTags();
+        initStageTags();
     }
 
-    public void InitAreaTags()
-    {
-        TagBase rootArea = new Area("湖北");
-        m_TagsTree.put(rootArea.getTagFullName(), rootArea);
-
-        TagBase SubArea = new Area("武汉");
-        rootArea.addSubTag(SubArea);
-
-        SubArea = new Area("黄冈");
-        rootArea.addSubTag(SubArea);
-
-        SubArea = new Area("孝感");
-        rootArea.addSubTag(SubArea);
-    }
-
-    private void InitStageTags()
+    private void initStageTags()
     {
         TagBase rootStage = new Stage();
         m_TagsTree.put(rootStage.getTagFullName(), rootStage);
@@ -94,5 +79,17 @@ public class TagMgr {
         }
     }
 
+    //只要是从这个类型派生的都找出来
+    public Collection<TagBase> findTagsByBaseClass(Class classType)
+    {
+        Collection<TagBase> resultTagsList = new ArrayList<>();
+
+        for (Map.Entry<String, TagBase> entry : m_TagsTree.entrySet())
+        {
+            resultTagsList.addAll(entry.getValue().findTagsByBaseClass(classType));
+        }
+
+        return resultTagsList;
+    }
 
 }

@@ -1,19 +1,19 @@
 package sim.app;
 
-import android.util.Pair;
-
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import sim.substance.Patient;
 import sim.substance.Population;
 import sim.tags.TagBase;
 import sim.tags.Tags;
 import sim.tags.stage.IncubationStage;
+import sim.worlds.FactoryMgr;
 
 public class PopulationMgr {
 
-    private Collection<Population> m_Populations = new ArrayList<>();
+    private Collection<Population> m_Populations = new HashSet<>();
 
     private PopulationMgr() {}
     private static PopulationMgr s_single=null;
@@ -24,43 +24,28 @@ public class PopulationMgr {
         return s_single;
     }
 
-    public void Init()
+    public void init()
     {
-        Population total = new Population(300*10000);
-        total.addTag(TagMgr.getInstance().findTagByFullName("湖北"));
-        m_Populations.add(total);
-
-        InitAreaTags();
+        FactoryMgr.getInstance().getFactory().initPopulations(m_Populations);
     }
 
-    private void InitAreaTags()
+    public Population getTheOnlyPopulation()
     {
-        Pair<Float, TagBase> splitArray[] = new Pair[]{
-                Pair.create(3.0f, TagMgr.getInstance().findTagByFullName("湖北.武汉")),
-                Pair.create(2.0f, TagMgr.getInstance().findTagByFullName("湖北.黄冈")),
-                Pair.create(1.0f, TagMgr.getInstance().findTagByFullName("湖北.孝感"))
-        };
-        ArrayList<Population> popsNeedAdd = new ArrayList<>();
-        ArrayList<Population> popsNeedRemove = new ArrayList<>();
-
-        for (Population pop:m_Populations)
+        if (m_Populations.size() == 1)
         {
-            //首先该Population需要有这些标签的父标签才能分割
-            if(!pop.haveOneTag(splitArray[0].second.getParentTag()))
-            {
-                continue;
-            }
-            ArrayList<Population> pops = pop.splitPopulations(splitArray);
-            popsNeedAdd.addAll(pops);
-            popsNeedRemove.add(pop);
-            deletePopulation(pop);
+            return m_Populations.iterator().next();
         }
-        m_Populations.removeAll(popsNeedRemove);
-        m_Populations.addAll(popsNeedAdd);
+        return null;
     }
 
-    private void deletePopulation(Population pop)
+    public void addPopulation(Population pop)
     {
+        m_Populations.add(pop);
+    }
+
+    public void deletePopulation(Population pop)
+    {
+        m_Populations.remove(pop);
         pop.deleteMe();
     }
 
@@ -126,5 +111,14 @@ public class PopulationMgr {
         Patient onePatient = infectOnePopulation(pop);
 
         return onePatient;
+    }
+
+    //将各个人群中的病人送入医院
+    public void gotoHospital()
+    {
+        for (Population pop : m_Populations)
+        {
+            pop.gotoHospital();
+        }
     }
 }

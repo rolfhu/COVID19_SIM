@@ -1,6 +1,5 @@
 package sim.substance;
 
-import sim.app.ConstValues;
 import sim.app.Controller;
 import sim.app.TagMgr;
 import sim.tags.stage.IntensiveStage;
@@ -8,7 +7,6 @@ import sim.worlds.FactoryMgr;
 import sim.tags.ITagHost;
 import sim.tags.TagBase;
 import sim.tags.Tags;
-import sim.tags.area.Area;
 import sim.tags.stage.OnsetStage;
 import sim.tags.stage.Stage;
 
@@ -16,9 +14,12 @@ public class Patient implements ITagHost {
 
     private Tags        m_Tags = null;
 
-    private float       m_R0 = ConstValues.R0;
+    //自己所属的人群
+    private Population  m_Population = null;
 
     private Stage       m_Stage = null;
+
+    private Hospital    m_Hospital = null;
 
     //病程的进展计算过哪一天了
     //是和Controller.m_nSimDays对应的
@@ -93,11 +94,22 @@ public class Patient implements ITagHost {
     @Override
     public void onAddOneTag(TagBase oneTag)
     {
+        if(oneTag instanceof Stage)
+        {
+            if (m_Population != null)
+            {
+                m_Population.addPatient(this);
+            }
+        }
     }
 
     @Override
     public void onRemoveOneTag(TagBase oneTag)
     {
+        if(oneTag instanceof Stage)
+        {
+            m_Population.removePatient(this, oneTag);
+        }
     }
 
     //获取今日传染力度，0为最低，1为100%传染1人，超过1为可能传染多人
@@ -130,16 +142,31 @@ public class Patient implements ITagHost {
         return nInfectNum;
     }
 
-    public Area getAreaTag()
-    {
-        Area area = (Area) m_Tags.findTagByBaseClass(Area.class);
-        return area;
-    }
-
     public Stage getStageTag()
     {
         return m_Stage;
     }
+
+    public Population getPopulation()
+    {
+        return m_Population;
+    }
+
+    public void setPopulation(Population pop)
+    {
+        m_Population = pop;
+    }
+
+    public void setHospital(Hospital hospital)
+    {
+        m_Hospital = hospital;
+    }
+
+    public Hospital getHospital()
+    {
+        return m_Hospital;
+    }
+
 
     public void changeToNewStage(String strNewStageName)
     {
@@ -188,5 +215,26 @@ public class Patient implements ITagHost {
             m_fCurrentHP = m_fCurrentHP - fDecreaseHP;
         }
 
+    }
+
+    public void gotoHospital(AreaHospital hospital)
+    {
+        //根据策略来决定是否能进入医院（住院）
+        if (hospital == null)
+        {
+            return;
+        }
+
+        hospital.addPatient(this);
+    }
+
+    public void leaveHospital()
+    {
+        if (m_Hospital == null)
+        {
+            return;
+        }
+
+        m_Hospital.removePatient(this);
     }
 }

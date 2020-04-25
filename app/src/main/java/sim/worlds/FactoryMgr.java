@@ -22,6 +22,8 @@ public class FactoryMgr {
             factory = new FactoryChina();
         }
 
+        factory.initCountryProps();
+
         m_factoryBase = factory;
     }
 

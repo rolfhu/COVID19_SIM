@@ -1,6 +1,7 @@
 package sim.tags;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -71,6 +72,11 @@ public class TagBase {
         m_SubTags.put(SubTag.getTagShortName(), SubTag);
     }
 
+    public boolean hasSubTag()
+    {
+        return !m_SubTags.isEmpty();
+    }
+
     //根据本级以下的标签名来寻找，而非全名
     public TagBase findTagByHalfName(String strHalfName)
     {
@@ -138,5 +144,23 @@ public class TagBase {
         }
 
         return lResult;
+    }
+
+    //查找本标签及子标签的指定类派生出来的标签
+    public Collection<TagBase> findTagsByBaseClass(Class classType)
+    {
+        Collection<TagBase> resultTagsList = new ArrayList<>();
+
+        if (classType.isAssignableFrom(this.getClass()))
+        {
+            resultTagsList.add(this);
+        }
+
+        for (Map.Entry<String, TagBase> entry : m_SubTags.entrySet())
+        {
+            resultTagsList.addAll(entry.getValue().findTagsByBaseClass(classType));
+        }
+
+        return resultTagsList;
     }
 }

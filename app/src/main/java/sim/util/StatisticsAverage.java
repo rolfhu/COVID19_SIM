@@ -38,7 +38,6 @@ public class StatisticsAverage {
 
     public String getResult()
     {
-
         String strResult = String.format("%s=%.5f", m_strName, getAverage());
         return strResult;
     }

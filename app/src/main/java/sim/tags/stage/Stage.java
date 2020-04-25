@@ -32,7 +32,12 @@ public class Stage extends TagBase {
     //计算抵抗力的变化
     public void calcResistance(Patient onePatient)
     {
-        onePatient.m_fCurrentResistancePower = onePatient.m_fCurrentResistancePower+onePatient.m_fResistancePowerGrowthSpeed;
+        float fResistancePowerGrowthSpeedRateByHospital = 1.0f;
+        if (onePatient.getHospital() != null)
+        {
+            fResistancePowerGrowthSpeedRateByHospital = 2.0f;
+        }
+        onePatient.m_fCurrentResistancePower = onePatient.m_fCurrentResistancePower+onePatient.m_fResistancePowerGrowthSpeed*fResistancePowerGrowthSpeedRateByHospital;
         if (onePatient.m_fCurrentResistancePower >= 0.9)
         {
             onePatient.m_fCurrentResistancePower = 0.9f;

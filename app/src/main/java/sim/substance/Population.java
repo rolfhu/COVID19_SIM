@@ -5,8 +5,9 @@ import android.util.Pair;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Iterator;
 
+import sim.area.Area;
 import sim.tags.ITagHost;
 import sim.tags.TagBase;
 import sim.tags.Tags;
@@ -32,6 +33,8 @@ public class Population implements ITagHost {
     private Collection<Patient> m_PatientSetImmune = new HashSet<>();
     private Collection<Patient> m_PatientSetDead = new HashSet<>();
 
+    private Area m_Area = null;
+
     //ITagHost
     @Override
     public void onAddOneTag(TagBase oneTag)
@@ -54,6 +57,7 @@ public class Population implements ITagHost {
     public Population(Population other)
     {
         m_nPopulation = other.m_nPopulation;
+        m_Area = other.m_Area;
         m_Tags = new Tags(other.m_Tags);
         m_Tags.setTagHost(this);
     }
@@ -67,27 +71,45 @@ public class Population implements ITagHost {
         return true;
     }
 
-    //将自己按照人数比例分割为指定的几份，以及切分后，每份的标签
-    public ArrayList<Population> splitPopulations(Pair<Float, TagBase>[] splitArray)
+    public AreaHospital getAreaHospital()
     {
-        //
-        float fTotal = 0;
-        for (Pair pairValue:splitArray)
+        if(m_Area == null)
         {
-            fTotal += (Float)pairValue.first;
+            return null;
+        }
+
+        return m_Area.getAreaHospital();
+    }
+
+    public void setArea(Area area)
+    {
+        m_Area = area;
+    }
+
+    public Area getArea()
+    {
+        return m_Area;
+    }
+
+    //将自己按照人数比例分割为指定的几份
+    public Collection<Population> splitPopulations(Float[] splitArray)
+    {
+        //计算总的比例份数
+        float fTotal = 0;
+        for (Float fValue:splitArray)
+        {
+            fTotal += fValue;
         }
         ArrayList<Population> resultArray = new ArrayList<>(splitArray.length);
 
         long nRestNum = m_nPopulation;
-        for (Pair pairValue:splitArray)
+        for (Float fValue:splitArray)
         {
-            float fValue = (Float)pairValue.first;
             if (nRestNum>=1)
             {
                 long nNum = (long) (m_nPopulation*(fValue/fTotal));
                 Population population = new Population(this);
                 population.m_nPopulation = nNum;
-                population.addTag((TagBase) pairValue.second);
                 resultArray.add(population);
                 nRestNum = nRestNum-nNum;
             }
@@ -96,6 +118,8 @@ public class Population implements ITagHost {
                 break;
             }
         }
+
+        //TODO 病人列表m_PatientSetXXX也应分割
 
         if (nRestNum != 0)
         {
@@ -164,6 +188,7 @@ public class Population implements ITagHost {
 
     public void addPatient(Patient onePatient)
     {
+        onePatient.setPopulation(this);
         Stage stage = onePatient.getStageTag();
         if(stage.getClass() == IncubationStage.class)
         {
@@ -172,6 +197,10 @@ public class Population implements ITagHost {
         else if(stage.getClass() == OnsetStage.class)
         {
             m_PatientSetOnset.add(onePatient);
+        }
+        else if(stage.getClass() == IntensiveStage.class)
+        {
+            m_PatientSetIntensive.add(onePatient);
         }
         else if(stage.getClass() == ImmuneStage.class)
         {
@@ -182,4 +211,48 @@ public class Population implements ITagHost {
             m_PatientSetDead.add(onePatient);
         }
     }
+
+    public void removePatient(Patient onePatient, TagBase oneTag)
+    {
+        Stage stage = (Stage) oneTag;
+        if(stage.getClass() == IncubationStage.class)
+        {
+            m_PatientSetIncubation.remove(onePatient);
+        }
+        else if(stage.getClass() == OnsetStage.class)
+        {
+            m_PatientSetOnset.remove(onePatient);
+        }
+        else if(stage.getClass() == IntensiveStage.class)
+        {
+            m_PatientSetIntensive.remove(onePatient);
+        }
+        else if(stage.getClass() == ImmuneStage.class)
+        {
+            m_PatientSetImmune.remove(onePatient);
+        }
+        else if(stage.getClass() == DeadStage.class)
+        {
+            m_PatientSetDead.remove(onePatient);
+        }
+    }
+
+    public void gotoHospital()
+    {
+        gotoHospital(m_PatientSetOnset);
+        gotoHospital(m_PatientSetIntensive);
+    }
+
+    private void gotoHospital(Collection<Patient> patientList)
+    {
+        Iterator it = patientList.iterator();
+        while(it.hasNext())
+        {
+            Patient onePatient = (Patient) it.next();
+            if (onePatient.getHospital() != null)
+                continue;
+            onePatient.gotoHospital(getAreaHospital());
+        }
+    }
+
 }

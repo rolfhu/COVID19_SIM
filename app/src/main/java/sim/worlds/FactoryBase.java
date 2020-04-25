@@ -1,9 +1,26 @@
 package sim.worlds;
 
-import sim.app.ConstValues;
-import sim.substance.Patient;
+import java.util.Collection;
 
-public class FactoryBase {
+import sim.app.AreaMgr;
+import sim.app.ConstValues;
+import sim.area.Area;
+import sim.substance.AreaHospital;
+import sim.substance.Hospital;
+import sim.substance.Patient;
+import sim.substance.Population;
+
+public abstract class FactoryBase {
+
+    //每万人普通床位数
+    public float m_fPopulationBedsRate = 0;
+    //每万人医生数
+    public float m_fPopulationDoctorsRate = 0;
+    //每万人ICU床数
+    public float m_fPopulationICUBedsRate = 0;
+
+    //初始化国家相关属性的参数
+    public abstract void initCountryProps();
 
     //初始化病人的一些参数，比如体质等
     public void initPaitent(Patient onePaitent)
@@ -27,4 +44,51 @@ public class FactoryBase {
 
         onePaitent.m_fVirusDensityToOnsetStage = 5f;
     }
+
+    public abstract void initPopulations(Collection<Population> populations);
+
+    public abstract void initArea(sim.area.Area rootArea);
+
+    //根据国家参数先创建默认的医院和病床等
+    public void initHospitals(Collection<Hospital> hospitalList)
+    {
+        initHospitals(AreaMgr.getInstance().m_RootArea, hospitalList);
+    }
+
+    public void initHospitals(Area area, Collection<Hospital> hospitalList)
+    {
+        Collection<Area> Areas = area.getChildAreas();
+
+        if(Areas.isEmpty())
+        {
+            AreaHospital oneAreaHospital = new AreaHospital();
+            area.setAreaHospital(oneAreaHospital);
+
+            Collection<Population> pops = area.getPopulations();
+
+            Hospital oneHospital = new Hospital();
+            long lPopulationNum = 0;
+            for (Population pop : pops)
+            {
+                lPopulationNum += pop.m_nPopulation;
+                //pop.setAreaHospital(oneHospital);
+            }
+            int nDoctorNum = (int) (lPopulationNum*m_fPopulationDoctorsRate/10000);
+            int nBedNum = (int) (lPopulationNum*m_fPopulationBedsRate/10000);
+            int nICUBedNum = (int) (lPopulationNum*m_fPopulationICUBedsRate/10000);
+
+            oneHospital.initHospital(nBedNum, nDoctorNum);
+            oneHospital.m_strHospitalName = area.getAreaFullName()+"-人民医院";
+
+            oneAreaHospital.addHospital(oneHospital);
+
+            hospitalList.add(oneHospital);
+        }
+
+        for (Area oneArea : Areas)
+        {
+            initHospitals(oneArea, hospitalList);
+        }
+    }
+
 }
