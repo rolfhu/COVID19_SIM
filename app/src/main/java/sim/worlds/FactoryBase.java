@@ -1,5 +1,6 @@
 package sim.worlds;
 
+import java.util.Calendar;
 import java.util.Collection;
 
 import sim.app.AreaMgr;
@@ -18,6 +19,9 @@ public abstract class FactoryBase {
     public float m_fPopulationDoctorsRate = 0;
     //每万人ICU床数
     public float m_fPopulationICUBedsRate = 0;
+
+    //第一天的对应日期
+    public Calendar m_StartDate = null;
 
     //初始化国家相关属性的参数
     public abstract void initCountryProps();

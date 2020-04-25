@@ -2,13 +2,17 @@ package sim.app;
 
 import android.util.Log;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import sim.strategy.hospital.IntoHospitalAll;
-import sim.strategy.hospital.IntoHospitalNormal;
-import sim.substance.Population;
+import sim.worlds.FactoryMgr;
 
 public class Controller {
     //开始模拟的天数计数
     private int m_nSimDays = 0;
+    private Calendar m_StartDate = null;
 
     private Controller() {}
     private static Controller s_single=null;
@@ -27,11 +31,41 @@ public class Controller {
         AreaMgr.getInstance().init();
         HospitalMgr.getInstance().init();
         PatientMgr.getInstance().init();
+
+        m_StartDate = FactoryMgr.getInstance().getFactory().m_StartDate;
     }
 
     public int getSimDays()
     {
         return m_nSimDays;
+    }
+
+    //根据日期（年-月-日）获取模拟的天数
+    public int getSimDaysByDate(String strDate)
+    {
+        Calendar cal = (Calendar) m_StartDate.clone();
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        try{
+            cal.setTime(format.parse(strDate));
+        }catch(ParseException e) {
+            e.printStackTrace();
+        }
+
+        long timeStart = m_StartDate.getTimeInMillis();
+        long timeEnd = cal.getTimeInMillis();
+
+        int between_days= (int) ((timeEnd-timeStart)/(1000*3600*24));
+
+        return between_days;
+    }
+
+    public Calendar getToday()
+    {
+        Calendar today = (Calendar) m_StartDate.clone();
+        today.add(Calendar.DATE, m_nSimDays);
+
+        return today;
     }
 
     public void runOneDay()
@@ -44,7 +78,7 @@ public class Controller {
             infectPopulations();
         }
 
-        if (m_nSimDays==80)
+        if (m_nSimDays==getSimDaysByDate("2020-2-5"))
         {
             //开始应收尽收
             HospitalMgr.getInstance().changeStrategy(new IntoHospitalAll());
@@ -78,7 +112,10 @@ public class Controller {
     private void outputStatus()
     {
         String strText = "";
-        strText = String.format("day=%d", m_nSimDays);
+        Calendar cal = getToday();
+        strText = String.format("%d-%02d-%02d day=%d",
+                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1, cal.get(Calendar.DATE),
+                m_nSimDays);
         Log.i("COVID19", strText);
 
         PatientMgr.getInstance().logOut();

@@ -1,6 +1,8 @@
 package sim.worlds;
 
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.GregorianCalendar;
 
 import sim.area.Area;
 import sim.substance.Hospital;
@@ -15,6 +17,9 @@ public class FactoryChina extends FactoryBase {
         m_fPopulationBedsRate = 4;
         m_fPopulationDoctorsRate = 10;
         m_fPopulationICUBedsRate = 0.35f;
+
+        Calendar calendar = new GregorianCalendar(2019, 10, 27);
+        m_StartDate = calendar;
     }
 
     @Override

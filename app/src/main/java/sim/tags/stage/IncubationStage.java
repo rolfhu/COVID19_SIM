@@ -1,7 +1,5 @@
 package sim.tags.stage;
 
-import sim.app.Controller;
-import sim.app.PatientMgr;
 import sim.substance.Patient;
 import sim.tags.TagUtility;
 
