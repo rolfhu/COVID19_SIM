@@ -1,11 +1,8 @@
 package sim.tags;
 
-import android.util.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import sim.tags.stage.Stage;
 
 //用于存放一个群体的所有标签，只有最终的叶子结点
 public class Tags {
@@ -117,5 +114,30 @@ public class Tags {
         }
 
         return null;
+    }
+
+    public boolean equals(Tags other)
+    {
+        if (this == other)
+        {
+            return true;
+        }
+
+        if (other.m_SubTags.size() != m_SubTags.size())
+        {
+            return false;
+        }
+        for (Map.Entry<String, TagBase> entry : m_SubTags.entrySet())
+        {
+            String strTagName = entry.getKey();
+            TagBase tagValue = entry.getValue();
+
+            TagBase tagValueOther = other.findTagByFullName(strTagName);
+            if (tagValue != tagValueOther)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -8,7 +8,7 @@ import sim.substance.Population;
 public class PopulationInit {
     public static void initPopulations(Collection<Population> populations) {
 
-        Population total = new Population(1000*10000);
+        Population total = new Population(14*10000*10000);
         //total.addTag(TagMgr.getInstance().findTagByFullName("湖北"));
         populations.add(total);
 

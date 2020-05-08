@@ -1,7 +1,5 @@
 package sim.substance;
 
-import android.util.Pair;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -17,6 +15,7 @@ import sim.tags.stage.IncubationStage;
 import sim.tags.stage.IntensiveStage;
 import sim.tags.stage.OnsetStage;
 import sim.tags.stage.Stage;
+import sim.util.Tools;
 
 public class Population implements ITagHost {
 
@@ -57,7 +56,7 @@ public class Population implements ITagHost {
     public Population(Population other)
     {
         m_nPopulation = other.m_nPopulation;
-        m_Area = other.m_Area;
+        //m_Area = other.m_Area;
         m_Tags = new Tags(other.m_Tags);
         m_Tags.setTagHost(this);
     }
@@ -91,8 +90,42 @@ public class Population implements ITagHost {
         return m_Area;
     }
 
-    //将自己按照人数比例分割为指定的几份
-    public Collection<Population> splitPopulations(Float[] splitArray)
+
+    //将另一个与自己标签相同的人群合并进来
+    public void mergePopulation(Population other)
+    {
+        m_nPopulation += other.m_nPopulation;
+        other.m_nPopulation = 0;
+
+        gainPatientOwner(other.m_PatientSetIncubation);
+        gainPatientOwner(other.m_PatientSetOnset);
+        gainPatientOwner(other.m_PatientSetIntensive);
+        gainPatientOwner(other.m_PatientSetImmune);
+        gainPatientOwner(other.m_PatientSetDead);
+
+        m_PatientSetIncubation.addAll(other.m_PatientSetIncubation);
+        m_PatientSetOnset.addAll(other.m_PatientSetOnset);
+        m_PatientSetIntensive.addAll(other.m_PatientSetIntensive);
+        m_PatientSetImmune.addAll(other.m_PatientSetImmune);
+        m_PatientSetDead.addAll(other.m_PatientSetDead);
+
+        other.m_PatientSetIncubation.clear();
+        other.m_PatientSetOnset.clear();
+        other.m_PatientSetIntensive.clear();
+        other.m_PatientSetImmune.clear();
+        other.m_PatientSetDead.clear();
+    }
+
+    private void gainPatientOwner(Collection<Patient> PatientSet)
+    {
+        for (Patient onePatient:PatientSet)
+        {
+            onePatient.setPopulation(this);
+        }
+    }
+
+    //将自己按照人数比例分割为指定的几份，同时转移其中的病人归属的人群
+    public ArrayList<Population> splitPopulations(Float[] splitArray, boolean bSplitAll)
     {
         //计算总的比例份数
         float fTotal = 0;
@@ -105,21 +138,24 @@ public class Population implements ITagHost {
         long nRestNum = m_nPopulation;
         for (Float fValue:splitArray)
         {
+            Population population = new Population(this);
+            resultArray.add(population);
             if (nRestNum>=1)
             {
                 long nNum = (long) (m_nPopulation*(fValue/fTotal));
-                Population population = new Population(this);
                 population.m_nPopulation = nNum;
-                resultArray.add(population);
                 nRestNum = nRestNum-nNum;
-            }
-            else
-            {
-                break;
             }
         }
 
-        //TODO 病人列表m_PatientSetXXX也应分割
+        splitPatientSet(m_PatientSetIncubation, resultArray, splitArray);
+        splitPatientSet(m_PatientSetOnset, resultArray, splitArray);
+        splitPatientSet(m_PatientSetImmune, resultArray, splitArray);
+        if(bSplitAll)
+        {
+            splitPatientSet(m_PatientSetIntensive, resultArray, splitArray);
+            splitPatientSet(m_PatientSetDead, resultArray, splitArray);
+        }
 
         if (nRestNum != 0)
         {
@@ -127,6 +163,36 @@ public class Population implements ITagHost {
         }
 
         return resultArray;
+    }
+
+    private void splitPatientSet(Collection<Patient> patientSetRaw,
+                                 ArrayList<Population> resultArray,
+                                 Float[] splitArray)
+    {
+        ArrayList<Collection<Object>> resultPatientArray = Tools.splitCollection(splitArray, (Collection<Object>)(Object)patientSetRaw, true);
+
+        for (int nIndex = 0; nIndex<resultPatientArray.size(); nIndex++)
+        {
+            Collection<Patient> splitPatientResult = (Collection<Patient>)(Object)resultPatientArray.get(nIndex);
+            Population population = resultArray.get(nIndex);
+
+            for (Patient onePat:splitPatientResult)
+            {
+                population.addPatient(onePat);
+            }
+        }
+    }
+
+    private void splitPatientSet(Collection<Patient> patientSetRaw,
+                                 Population targetPopulation,
+                                 Float splitRate)
+    {
+        Collection<Patient> splitPatientResult = (Collection<Patient>)(Object)Tools.splitCollection(splitRate, (Collection<Object>)(Object)patientSetRaw, true);
+
+        for (Patient onePat:splitPatientResult)
+        {
+            targetPopulation.addPatient(onePat);
+        }
     }
 
     public Patient createPatient()
@@ -256,4 +322,17 @@ public class Population implements ITagHost {
         }
     }
 
+    public Population splitPopulations(Float splitRate)
+    {
+        Population population = new Population(this);
+        long nNum = (long) (m_nPopulation*splitRate);
+        population.m_nPopulation = nNum;
+        m_nPopulation = m_nPopulation-nNum;
+
+        splitPatientSet(m_PatientSetIncubation, population, splitRate);
+        splitPatientSet(m_PatientSetOnset, population, splitRate);
+        splitPatientSet(m_PatientSetImmune, population, splitRate);
+
+        return population;
+    }
 }

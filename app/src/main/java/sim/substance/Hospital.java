@@ -26,16 +26,16 @@ public class Hospital implements ITagHost {
     private Collection<Bed> m_FreeBeds = new HashSet<>();
     private Collection<Bed> m_UsingBeds = new HashSet<>();
 
+    //尚未初始化的床位，使用到的时候初始化
+    private int m_nUninitialedBedsNum = 0;
+
     //康复出院的人数和院内死亡的人数
     private long m_HealthNum = 0;
     private long m_DeadNum = 0;
 
     public void initHospital(int nBedNum, int nDoctorNum) {
         m_nDoctorNum = nDoctorNum;
-        for (int i = 0; i < nBedNum; i++) {
-            Bed oneBed = new Bed(this);
-            m_FreeBeds.add(oneBed);
-        }
+        m_nUninitialedBedsNum = nBedNum;
         m_Tags.setTagHost(this);
     }
 
@@ -60,6 +60,10 @@ public class Hospital implements ITagHost {
 
     public boolean isHospitalFull()
     {
+        if (m_nUninitialedBedsNum != 0)
+        {
+            return false;
+        }
         return m_FreeBeds.isEmpty();
     }
 
@@ -67,7 +71,14 @@ public class Hospital implements ITagHost {
     {
         if (m_FreeBeds.isEmpty())
         {
-            return;
+            if (m_nUninitialedBedsNum == 0)
+            {
+                return;
+            }
+            m_nUninitialedBedsNum--;
+
+            Bed oneBed = new Bed(this);
+            m_FreeBeds.add(oneBed);
         }
         Iterator<Bed> iter = m_FreeBeds.iterator();
         Bed oneBed = iter.next();
@@ -116,7 +127,7 @@ public class Hospital implements ITagHost {
     public void logOut()
     {
         String strLog = String.format("%s Using=%d Free=%d 康复=%d 死亡=%d",
-                m_strHospitalName, m_UsingBeds.size(), m_FreeBeds.size(),
+                m_strHospitalName, m_UsingBeds.size(), m_FreeBeds.size()+m_nUninitialedBedsNum,
                 m_HealthNum, m_DeadNum);
         Log.i("hospital", strLog);
     }

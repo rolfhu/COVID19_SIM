@@ -3,7 +3,6 @@ package sim.strategy.hospital;
 import sim.strategy.StrategyBase;
 import sim.substance.Hospital;
 import sim.substance.Patient;
-import sim.tags.stage.IntensiveStage;
 
 public class IntoHospitalAll extends StrategyBase implements IAcceptIntoHospital {
 

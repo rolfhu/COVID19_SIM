@@ -1,8 +1,8 @@
 package sim.tags.stage;
 
-import sim.app.ConstValues;
 import sim.substance.Patient;
 import sim.tags.TagUtility;
+import sim.util.Tools;
 
 //发病期，有传染力
 public class OnsetStage extends Stage {
@@ -31,7 +31,7 @@ public class OnsetStage extends Stage {
         float fInfectionPower = onePatient.getInfectionPower();
 
         //根据几率来计算最后感染的人数
-        float fRand = ConstValues.s_Random.nextFloat();
+        float fRand = Tools.Random().nextFloat();
         int nRet = 0;
         if (fInfectionPower > 1)
         {

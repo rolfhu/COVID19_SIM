@@ -15,6 +15,7 @@ import sim.tags.stage.IncubationStage;
 import sim.tags.stage.IntensiveStage;
 import sim.tags.stage.OnsetStage;
 import sim.util.StatisticsAverage;
+import sim.util.Tools;
 
 public class PatientMgr {
 
@@ -37,7 +38,7 @@ public class PatientMgr {
     public void init()
     {
         //产生零号病人
-        Area area = AreaMgr.getInstance().findAreaByFullName("湖北.武汉");
+        Area area = AreaMgr.getInstance().findAreaByFullName("中国.湖北.武汉");
         Collection<Population> pops = area.getPopulations();
         Patient oneInfectPatient = PopulationMgr.getInstance().infectOnePopulation(pops);
         m_PatientListIncubation.add(oneInfectPatient);
@@ -63,6 +64,11 @@ public class PatientMgr {
             }
             //先根据区域获取到本区域所有的人群列表
             Area area = onePatient.getPopulation().getArea();
+            if (area == null)
+            {
+                int i=0;
+                i++;
+            }
             long lHealthyNum = area.getAllPopulationHealthyNums();
             long lIncubationNum = area.getAllPopulationNumsByStage(IncubationStage.class);
             long lOnsetNum = area.getAllPopulationNumsByStage(OnsetStage.class);
@@ -74,7 +80,7 @@ public class PatientMgr {
 
             for (int i=0; i<nInfectNum; i++)
             {
-                float fRand = ConstValues.s_Random.nextFloat();
+                float fRand = Tools.Random().nextFloat();
                 if (fRand < fInfectRate)
                 {
                     onePatient.m_InfectNum++;

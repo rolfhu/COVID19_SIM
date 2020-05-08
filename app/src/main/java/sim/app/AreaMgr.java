@@ -48,7 +48,26 @@ public class AreaMgr {
 
     public Area findAreaByFullName(String strFullName)
     {
-        return m_RootArea.findAreaByHalfName(strFullName);
+        String strAreaName = AreaMgr.getAreaFirstName(strFullName);
+        if (strAreaName.equals(m_RootArea.getAreaShortName()))
+        {
+            if (strAreaName.equals(strFullName))
+            {
+                return m_RootArea;
+            }
+            else
+            {
+                String strAreaNextNames = AreaMgr.getAreaNextNames(strFullName);
+
+                return m_RootArea.findAreaByHalfName(strAreaNextNames);
+            }
+        }
+        return null;
     }
 
+
+    public void logOut()
+    {
+        m_RootArea.logOut();
+    }
 }

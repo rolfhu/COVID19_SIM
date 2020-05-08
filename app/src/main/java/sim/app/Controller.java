@@ -4,9 +4,13 @@ import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashSet;
 
-import sim.strategy.hospital.IntoHospitalAll;
+import sim.strategy.quarantine.IAreaQuarantineStrategy;
+import sim.substance.Patient;
 import sim.worlds.FactoryMgr;
 
 public class Controller {
@@ -72,7 +76,6 @@ public class Controller {
     {
         Calendar today = (Calendar) m_StartDate.clone();
         today.add(Calendar.DATE, m_nSimDays);
-
         return today;
     }
 
@@ -83,6 +86,8 @@ public class Controller {
         //每天初始化的部分
         PolicyMgr.getInstance().onDayStart();
 
+        //模拟人群的流动
+        doTransfer();
 
         //模拟感染的过程，更新各种人群的人数
         if (m_nSimDays<=100)
@@ -105,6 +110,11 @@ public class Controller {
 
         //输出大致情况
         outputStatus();
+    }
+
+    private void doTransfer()
+    {
+        AreaMgr.getInstance().m_RootArea.doTransfer(null);
     }
 
     private void gotoHospital()
@@ -134,6 +144,8 @@ public class Controller {
         PatientMgr.getInstance().logOut();
 
         HospitalMgr.getInstance().logOut();
+
+        AreaMgr.getInstance().logOut();
 
         strText = String.format("----------------------------------------------------");
         Log.i("COVID19", strText);
