@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         m_MainController = Controller.getInstance();
         m_MainController.Init();
 
-        for (int i=0;i<400;i++)
+        for (int i=0;i<80;i++)
         {
             m_MainController.runOneDay();
         }

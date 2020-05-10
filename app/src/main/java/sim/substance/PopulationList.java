@@ -15,7 +15,17 @@ public class PopulationList {
         return m_Populations;
     }
 
-    //将一个人群合并进来
+    //对另一个popList不会有影响
+    public void clonePopulationList(PopulationList popList)
+    {
+        for (Population onePop:popList.m_Populations)
+        {
+            Population newPop = new Population(onePop);
+            m_Populations.add(newPop);
+        }
+    }
+
+    //将一个人群合并进来，Population pop会被清空
     public void mergePopulation(Population pop)
     {
         Tags tagsPop = pop.cloneTags();
@@ -32,12 +42,38 @@ public class PopulationList {
         m_Populations.add(pop);
     }
 
-    //将一个人群列表合并进来
+    //将一个人群列表合并进来，PopulationList popList会被清空
     public void mergePopulationList(PopulationList popList)
     {
         for (Population onePop:popList.m_Populations)
         {
             mergePopulation(onePop);
+        }
+    }
+
+    //将一个人群合并进来，Population pop不会受影响
+    public void mergePopulationNoClearSrc(Population pop)
+    {
+        Tags tagsPop = pop.cloneTags();
+        for (Population onePop:m_Populations)
+        {
+            Tags tagsOnePop = onePop.cloneTags();
+
+            if (tagsPop.equals(tagsOnePop))
+            {
+                onePop.mergePopulationNoClearSrc(pop);
+                return;
+            }
+        }
+        m_Populations.add(pop);
+    }
+
+    //将一个人群列表合并进来，PopulationList popList不会受影响
+    public void mergePopulationListNoClearSrc(PopulationList popList)
+    {
+        for (Population onePop:popList.m_Populations)
+        {
+            mergePopulationNoClearSrc(onePop);
         }
     }
 

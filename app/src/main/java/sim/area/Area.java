@@ -15,7 +15,6 @@ import sim.app.PopulationMgr;
 import sim.strategy.quarantine.AreaQuarantineStrategy;
 import sim.strategy.quarantine.IAreaQuarantineStrategy;
 import sim.substance.AreaHospital;
-import sim.substance.Patient;
 import sim.substance.Population;
 import sim.substance.PopulationList;
 import sim.tags.stage.DeadStage;
@@ -23,7 +22,6 @@ import sim.tags.stage.ImmuneStage;
 import sim.tags.stage.IncubationStage;
 import sim.tags.stage.IntensiveStage;
 import sim.tags.stage.OnsetStage;
-import sim.util.Tools;
 
 public class Area {
     final static public String AREA_SEPARATOR = ".";
@@ -266,6 +264,25 @@ public class Area {
         return m_PopulationList.getPopulations();
     }
 
+    public PopulationList getPopulationListWithAllSubArea()
+    {
+        PopulationList allList = new PopulationList();
+
+        if (m_ChildAreaMap.size() != 0)
+        {
+            for (Area subArea:m_ChildAreaMap.values())
+            {
+                allList.mergePopulationListNoClearSrc(subArea.getPopulationListWithAllSubArea());
+            }
+        }
+        else
+        {
+            allList.mergePopulationListNoClearSrc(m_PopulationList);
+        }
+
+        return allList;
+    }
+
     //对本区域进行人口流动操作
     public void doTransfer(PopulationList populationListTransferOut)
     {
@@ -368,6 +385,22 @@ public class Area {
                 nPopulationOnsetNum, nPopulationIntensiveNum,
                 nPopulationImmuneNum, nPopulationDeadNum);
         Log.i("area", strLog);
+    }
 
+    public HashSet<Area> getAreaSets()
+    {
+        HashSet<Area> AreaSets = new HashSet<Area>();
+
+        if (m_ChildAreaMap.size() != 0)
+        {
+            for (Area subArea:m_ChildAreaMap.values())
+            {
+                AreaSets.addAll(subArea.getAreaSets());
+            }
+        }
+
+        AreaSets.add(this);
+
+        return AreaSets;
     }
 }

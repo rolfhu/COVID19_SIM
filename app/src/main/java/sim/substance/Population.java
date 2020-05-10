@@ -59,6 +59,12 @@ public class Population implements ITagHost {
         //m_Area = other.m_Area;
         m_Tags = new Tags(other.m_Tags);
         m_Tags.setTagHost(this);
+
+        copyPatientList(m_PatientSetIncubation, other.m_PatientSetIncubation);
+        copyPatientList(m_PatientSetOnset, other.m_PatientSetOnset);
+        copyPatientList(m_PatientSetIntensive, other.m_PatientSetIntensive);
+        copyPatientList(m_PatientSetImmune, other.m_PatientSetImmune);
+        copyPatientList(m_PatientSetDead, other.m_PatientSetDead);
     }
 
     public boolean haveOneTag(TagBase oneTag)
@@ -91,7 +97,7 @@ public class Population implements ITagHost {
     }
 
 
-    //将另一个与自己标签相同的人群合并进来
+    //将另一个与自己标签相同的人群合并进来，Population other会被清空
     public void mergePopulation(Population other)
     {
         m_nPopulation += other.m_nPopulation;
@@ -122,6 +128,23 @@ public class Population implements ITagHost {
         {
             onePatient.setPopulation(this);
         }
+    }
+
+    //将另一个与自己标签相同的人群合并进来，不影响Population other
+    public void mergePopulationNoClearSrc(Population other)
+    {
+        m_nPopulation += other.m_nPopulation;
+
+        m_PatientSetIncubation.addAll(other.m_PatientSetIncubation);
+        m_PatientSetOnset.addAll(other.m_PatientSetOnset);
+        m_PatientSetIntensive.addAll(other.m_PatientSetIntensive);
+        m_PatientSetImmune.addAll(other.m_PatientSetImmune);
+        m_PatientSetDead.addAll(other.m_PatientSetDead);
+    }
+
+    private void copyPatientList(Collection<Patient> dstPatientSet, Collection<Patient> srcPatientSet)
+    {
+        dstPatientSet.addAll(srcPatientSet);
     }
 
     //将自己按照人数比例分割为指定的几份，同时转移其中的病人归属的人群

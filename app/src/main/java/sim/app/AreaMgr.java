@@ -65,7 +65,6 @@ public class AreaMgr {
         return null;
     }
 
-
     public void logOut()
     {
         m_RootArea.logOut();

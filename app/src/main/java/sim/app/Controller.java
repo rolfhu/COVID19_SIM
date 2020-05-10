@@ -110,6 +110,9 @@ public class Controller {
 
         //输出大致情况
         outputStatus();
+
+        //收集图表数据
+        collectDataForChart();
     }
 
     private void doTransfer()
@@ -150,4 +153,9 @@ public class Controller {
         strText = String.format("----------------------------------------------------");
         Log.i("COVID19", strText);
     }
+
+    private void collectDataForChart() {
+        CollectDataMgr.getInstance().collectTodayData();
+    }
+
 }
