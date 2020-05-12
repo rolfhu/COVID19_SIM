@@ -89,6 +89,7 @@ public class CollectDataMgr {
         return s_single;
     }
 
+    //每天结束时，计算当天的数据并保存起来
     public void collectTodayData() {
         int nToday = Controller.getInstance().getSimDays();
         if (m_AllDataArray.size() > nToday)
@@ -102,6 +103,7 @@ public class CollectDataMgr {
         m_AllDataArray.add(todayData);
     }
 
+    //获取某一项数据的每天的值的数组
     public ArrayList<Object> getDataListByName(String strDataName) {
 
         ArrayList<Object> result = new ArrayList<Object>();

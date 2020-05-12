@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import me.sim.COVID19.MainActivity;
 import me.sim.COVID19.R;
 
 public class HomeFragment extends Fragment {
@@ -30,6 +32,34 @@ public class HomeFragment extends Fragment {
                 textView.setText(s);
             }
         });
+
+        final TextView ProgressTextView = root.findViewById(R.id.textView_progress);
+        homeViewModel.getProgressText().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String s) {
+                ProgressTextView.setText(s);
+            }
+        });
+
+        setButtons(root);
         return root;
+    }
+
+    private void setButtons(View root) {
+        Button btnOneDay = root.findViewById(R.id.button_one_day);
+        btnOneDay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity)getActivity()).m_MainController.postRunDays(1);
+            }
+        });
+
+        Button btnTenDay = root.findViewById(R.id.button_ten_day);
+        btnTenDay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity)getActivity()).m_MainController.postRunDays(10);
+            }
+        });
     }
 }

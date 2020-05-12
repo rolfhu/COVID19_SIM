@@ -37,11 +37,11 @@ public class MainActivity extends AppCompatActivity {
         FactoryMgr.getInstance().createFactory("China");
 
         m_MainController = Controller.getInstance();
-        m_MainController.Init();
+        m_MainController.Init(this);
 
         for (int i=0;i<80;i++)
         {
-            m_MainController.runOneDay();
+            //m_MainController.runOneDay();
         }
 
         PatientMgr patMgr = PatientMgr.getInstance();

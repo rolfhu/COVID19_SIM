@@ -9,6 +9,7 @@
         android:id="@+id/navigation_home"
         android:name="me.sim.COVID19.ui.home.HomeFragment"
         android:label="@string/title_home"
+        android:tag="R.id.navigation_home"
         tools:layout="@layout/fragment_home" >
         <action
             android:id="@+id/action_navigation_home_to_navigation_dashboard"
