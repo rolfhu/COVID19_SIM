@@ -20,7 +20,7 @@ public class PopulationList {
     {
         for (Population onePop:popList.m_Populations)
         {
-            Population newPop = new Population(onePop);
+            Population newPop = new Population(onePop, true);
             m_Populations.add(newPop);
         }
     }
@@ -65,7 +65,9 @@ public class PopulationList {
                 return;
             }
         }
-        m_Populations.add(pop);
+        //没有找到同样标签的人群，那么要克隆一个人群出来加进去
+        Population popnew = new Population(pop, true);
+        m_Populations.add(popnew);
     }
 
     //将一个人群列表合并进来，PopulationList popList不会受影响

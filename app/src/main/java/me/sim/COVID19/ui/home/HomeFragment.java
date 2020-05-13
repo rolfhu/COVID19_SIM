@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import me.sim.COVID19.MainActivity;
 import me.sim.COVID19.R;
+import sim.app.Controller;
 
 public class HomeFragment extends Fragment {
 
@@ -50,7 +51,7 @@ public class HomeFragment extends Fragment {
         btnOneDay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity)getActivity()).m_MainController.postRunDays(1);
+                Controller.getInstance().postRunDays(1);
             }
         });
 
@@ -58,7 +59,7 @@ public class HomeFragment extends Fragment {
         btnTenDay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity)getActivity()).m_MainController.postRunDays(10);
+                Controller.getInstance().postRunDays(10);
             }
         });
     }

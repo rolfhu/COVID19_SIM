@@ -53,18 +53,21 @@ public class Population implements ITagHost {
         m_Tags.setTagHost(this);
     }
 
-    public Population(Population other)
+    public Population(Population other, boolean bNeedDetail)
     {
-        m_nPopulation = other.m_nPopulation;
         //m_Area = other.m_Area;
         m_Tags = new Tags(other.m_Tags);
         m_Tags.setTagHost(this);
 
-        copyPatientList(m_PatientSetIncubation, other.m_PatientSetIncubation);
-        copyPatientList(m_PatientSetOnset, other.m_PatientSetOnset);
-        copyPatientList(m_PatientSetIntensive, other.m_PatientSetIntensive);
-        copyPatientList(m_PatientSetImmune, other.m_PatientSetImmune);
-        copyPatientList(m_PatientSetDead, other.m_PatientSetDead);
+        if (bNeedDetail)
+        {
+            m_nPopulation = other.m_nPopulation;
+            copyPatientList(m_PatientSetIncubation, other.m_PatientSetIncubation);
+            copyPatientList(m_PatientSetOnset, other.m_PatientSetOnset);
+            copyPatientList(m_PatientSetIntensive, other.m_PatientSetIntensive);
+            copyPatientList(m_PatientSetImmune, other.m_PatientSetImmune);
+            copyPatientList(m_PatientSetDead, other.m_PatientSetDead);
+        }
     }
 
     public boolean haveOneTag(TagBase oneTag)
@@ -161,7 +164,7 @@ public class Population implements ITagHost {
         long nRestNum = m_nPopulation;
         for (Float fValue:splitArray)
         {
-            Population population = new Population(this);
+            Population population = new Population(this, false);
             resultArray.add(population);
             if (nRestNum>=1)
             {
@@ -347,7 +350,7 @@ public class Population implements ITagHost {
 
     public Population splitPopulations(Float splitRate)
     {
-        Population population = new Population(this);
+        Population population = new Population(this, false);
         long nNum = (long) (m_nPopulation*splitRate);
         population.m_nPopulation = nNum;
         m_nPopulation = m_nPopulation-nNum;

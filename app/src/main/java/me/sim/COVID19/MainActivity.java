@@ -18,7 +18,7 @@ import sim.worlds.FactoryMgr;
 
 public class MainActivity extends AppCompatActivity {
 
-    public Controller m_MainController;
+    private Controller m_MainController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

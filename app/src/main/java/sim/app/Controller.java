@@ -29,6 +29,10 @@ public class Controller {
     private HandlerThread m_MainSimThread = null;
     private Handler m_MainSimThreadHandler = null;
 
+    private int m_nProgressTotalNum = 0;
+    private int m_nProgressCurrentNum = 0;
+    private String m_strProgressName = "";
+
     public Activity m_context = null;
     private Controller() {}
     private static Controller s_single=null;
@@ -141,12 +145,12 @@ public class Controller {
         //每天初始化的部分
         PolicyMgr.getInstance().onDayStart();
 
-        setProgress("模拟人群的流动", 0);
+        setProgress("模拟人群流动", 0);
         //模拟人群的流动
         doTransfer();
 
         //模拟感染的过程，更新各种人群的人数
-        if (m_nSimDays<=100)
+        if (m_nSimDays<=65)
         {
             //某个时刻停止传染，用于查看长期死亡率
             setProgress("模拟感染的过程", 0);
@@ -160,7 +164,7 @@ public class Controller {
 //        }
 
         //对被感染的个人计算病程
-        setProgress("对被感染的个人计算病程", 0);
+        setProgress("计算病程", 0);
         calcStages();
 
         //模拟进入医院的过程
@@ -212,8 +216,8 @@ public class Controller {
     {
         String strText = "";
         Calendar cal = getToday();
-        strText = String.format("%d-%02d-%02d 完成计算",
-                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1, cal.get(Calendar.DATE));
+        strText = String.format("%d-%02d-%02d 第%d天\r\n完成计算",
+                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1, cal.get(Calendar.DATE), m_nSimDays);
         setSimDayUIProgressText(strText);
     }
 
@@ -221,8 +225,8 @@ public class Controller {
     {
         String strText = "";
         Calendar cal = getToday();
-        strText = String.format("%d-%02d-%02d 开始计算",
-                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1, cal.get(Calendar.DATE));
+        strText = String.format("%d-%02d-%02d 第%d天\r\n开始计算",
+                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1, cal.get(Calendar.DATE), m_nSimDays);
         setSimDayUIProgressText(strText);
     }
 
@@ -230,8 +234,8 @@ public class Controller {
     {
         String strText = "";
         Calendar cal = getToday();
-        strText = String.format("%d-%02d-%02d %s %d%%",
-                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1, cal.get(Calendar.DATE),
+        strText = String.format("%d-%02d-%02d 第%d天\r\n%s %d%%",
+                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1, cal.get(Calendar.DATE), m_nSimDays,
                 strPeriod, progressPercent);
 
         setSimDayUIProgressText(strText);
@@ -239,6 +243,8 @@ public class Controller {
 
     private void doTransfer()
     {
+        int nTotalNum = AreaMgr.getInstance().m_RootArea.getAreaSets().size();
+        Controller.getInstance().startProgress("模拟人群流动", nTotalNum);
         AreaMgr.getInstance().m_RootArea.doTransfer(null);
     }
 
@@ -280,4 +286,21 @@ public class Controller {
         CollectDataMgr.getInstance().collectTodayData();
     }
 
+    public void startProgress(String strProgressName, int nTotalNum)
+    {
+        m_strProgressName = strProgressName;
+        m_nProgressTotalNum = Math.max(nTotalNum, 1);
+        m_nProgressCurrentNum = 0;
+    }
+
+    public void addProgress(int nNumAdd)
+    {
+        m_nProgressCurrentNum += nNumAdd;
+        int nPercent = 100*m_nProgressCurrentNum/m_nProgressTotalNum;
+        if (nPercent >= 100)
+        {
+            nPercent = 100;
+        }
+        setProgress(m_strProgressName, nPercent);
+    }
 }

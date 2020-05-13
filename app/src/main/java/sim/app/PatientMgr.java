@@ -26,6 +26,11 @@ public class PatientMgr {
     private Collection<Patient> m_PatientListImmune = new HashSet<>();
     private Collection<Patient> m_PatientListDead = new HashSet<>();
 
+    //各个阶段的计算速度不同，让进度更加线性化
+    private float m_fIncubationSpeed = 1f;
+    private float m_fOnsetSpeed = 1f;
+    private float m_fIntensiveSpeed = 1f;
+
     private PatientMgr() {}
     private static PatientMgr s_single=null;
     public static PatientMgr getInstance() {
@@ -94,16 +99,70 @@ public class PatientMgr {
 
     public void calcStages()
     {
-        calcStages(m_PatientListIncubation);
-        calcStages(m_PatientListOnset);
-        calcStages(m_PatientListIntensive);
+        int nIncubationNum = m_PatientListIncubation.size();
+        int nOnsetNum = m_PatientListOnset.size();
+        int nIntensiveNum = m_PatientListIntensive.size();
+        int nTotalNum = (int) (nIncubationNum/m_fIncubationSpeed + nOnsetNum/m_fOnsetSpeed + nIntensiveNum/m_fIntensiveSpeed);
+        Controller.getInstance().startProgress("计算病程", nTotalNum);
+        long time1 = System.currentTimeMillis();
+        calcStages(m_PatientListIncubation, m_fIncubationSpeed);
+        long time2 = System.currentTimeMillis();
+        calcStages(m_PatientListOnset, m_fOnsetSpeed);
+        long time3 = System.currentTimeMillis();
+        calcStages(m_PatientListIntensive, m_fIntensiveSpeed);
+        long time4 = System.currentTimeMillis();
+
+        long lcalcStageIncubationCost = time2 - time1;
+        long lcalcStageOnsetCost = time3 - time2;
+        long lalcStageIntensiveCost = time4 - time3;
+
+        lcalcStageIncubationCost = Math.max(lcalcStageIncubationCost, 1);
+        lcalcStageOnsetCost = Math.max(lcalcStageOnsetCost, 1);
+        lalcStageIntensiveCost = Math.max(lalcStageIntensiveCost, 1);
+
+        float fIncubationSpeed = (float)nIncubationNum/lcalcStageIncubationCost;
+        float fOnsetSpeed = (float)nOnsetNum/lcalcStageOnsetCost;
+        float fIntensiveSpeed = (float)nIntensiveNum/lalcStageIntensiveCost;
+
+        fIncubationSpeed = Math.max(fIncubationSpeed, 1f);
+        fOnsetSpeed = Math.max(fOnsetSpeed, 1f);
+        fIntensiveSpeed = Math.max(fIntensiveSpeed, 1f);
+
+        while(true)
+        {
+            if (fIncubationSpeed>10 && fOnsetSpeed>10 && fIntensiveSpeed>10)
+            {
+                fIncubationSpeed /= 10;
+                fOnsetSpeed /= 10;
+                fIntensiveSpeed /= 10;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        m_fIncubationSpeed = fIncubationSpeed;
+        m_fOnsetSpeed = fOnsetSpeed;
+        m_fIntensiveSpeed = fIntensiveSpeed;
     }
 
-    private void calcStages(Collection<Patient> patientList)
+    private void calcStages(Collection<Patient> patientList, float fSpeed)
     {
+        int nNum = 0;
+        float fEndValue = 0f;
         Iterator it = patientList.iterator();
         while(it.hasNext())
         {
+            nNum++;
+            if (nNum == 1000)
+            {
+                int nSend = (int) (nNum/fSpeed+fEndValue);
+                fEndValue =  (nNum/fSpeed)+fEndValue - nSend;
+                Controller.getInstance().addProgress(nSend);
+                nNum = 0;
+
+            }
             Patient onePatient = (Patient) it.next();
             boolean bStageChanged = onePatient.calcStage();
             if (bStageChanged)
@@ -112,6 +171,8 @@ public class PatientMgr {
                 addPatientToProperList(onePatient);
             }
         }
+
+        Controller.getInstance().addProgress((int) (nNum/fSpeed));
     }
 
     private void addPatientToProperList(Patient onePatient)

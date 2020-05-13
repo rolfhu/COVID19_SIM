@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import sim.app.AreaMgr;
+import sim.app.Controller;
 import sim.app.PopulationMgr;
 import sim.strategy.quarantine.AreaQuarantineStrategy;
 import sim.strategy.quarantine.IAreaQuarantineStrategy;
@@ -291,6 +292,7 @@ public class Area {
         {
             PopulationList popList = m_AreaQuarantineStrategy.getTransferOutPopulationList(this);
             populationListTransferOut.mergePopulationList(popList);
+            Controller.getInstance().addProgress(1);
             return;
         }
 
@@ -337,6 +339,8 @@ public class Area {
 
         //将populationListTransferInside分配到各个子区域(参考各个子区域的m_fTransferPopNums)
         m_AreaQuarantineStrategy.doTransferInside(this, populationListTransferInside);
+
+        Controller.getInstance().addProgress(1);
 
         return;
     }
