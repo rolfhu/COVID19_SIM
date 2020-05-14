@@ -1,5 +1,7 @@
 package sim.tags.stage;
 
+import sim.app.PolicyMgr;
+import sim.policy.quarantine.PolicyVillageQuarantine;
 import sim.substance.Patient;
 import sim.tags.TagBase;
 

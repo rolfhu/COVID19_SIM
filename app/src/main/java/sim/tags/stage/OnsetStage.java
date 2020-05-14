@@ -1,5 +1,7 @@
 package sim.tags.stage;
 
+import sim.app.PolicyMgr;
+import sim.policy.quarantine.PolicyVillageQuarantine;
 import sim.substance.Patient;
 import sim.tags.TagUtility;
 import sim.util.Tools;
@@ -28,7 +30,7 @@ public class OnsetStage extends Stage {
     @Override
     public int calcInfection(Patient onePatient)
     {
-        float fInfectionPower = onePatient.getInfectionPower();
+        float fInfectionPower = onePatient.getInfectionPowerByPolicy();
 
         //根据几率来计算最后感染的人数
         float fRand = Tools.Random().nextFloat();

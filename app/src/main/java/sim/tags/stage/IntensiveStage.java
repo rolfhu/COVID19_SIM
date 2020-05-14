@@ -29,7 +29,7 @@ public class IntensiveStage extends Stage {
     @Override
     public int calcInfection(Patient onePatient)
     {
-        float fInfectionPower = onePatient.getInfectionPower();
+        float fInfectionPower = onePatient.getInfectionPowerByPolicy();
 
         //根据几率来计算最后感染的人数
         float fRand = Tools.Random().nextFloat();

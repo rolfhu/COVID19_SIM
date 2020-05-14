@@ -47,6 +47,15 @@ public abstract class PolicyBase {
         return Controller.getInstance().isDateReached(m_strUsableDate);
     }
 
+    public boolean isActive()
+    {
+        if (m_PolicyState == PolicyState.PS_Activate)
+        {
+            return true;
+        }
+        return false;
+    }
+
     public void setPolicyState(PolicyState NewPolicyState)
     {
         if(NewPolicyState == m_PolicyState)

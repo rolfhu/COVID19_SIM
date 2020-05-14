@@ -51,6 +51,11 @@ public class PatientMgr {
 
     public void infectPopulations()
     {
+        int nOnsetNum = m_PatientListOnset.size();
+        int nIntensiveNum = m_PatientListIntensive.size();
+        int nTotalNum = (int) (nOnsetNum + nIntensiveNum);
+        Controller.getInstance().startProgress("模拟感染的过程", nTotalNum);
+
         infectPopulations(m_PatientListOnset);
         infectPopulations(m_PatientListIntensive);
     }
@@ -58,22 +63,25 @@ public class PatientMgr {
     //每个病人对其所在区域的人群进行感染
     private void infectPopulations(Collection<Patient> patientList)
     {
+        int nNum = 0;
         for (Patient onePatient : patientList)
         {
-            int nInfectNum = onePatient.calcInfectNum();
-            //得到传播次数后，根据人群中的免疫人群比例，计算出实际应该感染多少人
+            nNum++;
+            if (nNum == 1000)
+            {
+                Controller.getInstance().addProgress(nNum);
+                nNum = 0;
+            }
 
+            int nInfectNum = onePatient.calcInfectNum();
+
+            //得到传播次数后，根据人群中的免疫人群比例，计算出实际应该感染多少人
             if (nInfectNum == 0)
             {
                 continue;
             }
             //先根据区域获取到本区域所有的人群列表
             Area area = onePatient.getPopulation().getArea();
-            if (area == null)
-            {
-                int i=0;
-                i++;
-            }
             long lHealthyNum = area.getAllPopulationHealthyNums();
             long lIncubationNum = area.getAllPopulationNumsByStage(IncubationStage.class);
             long lOnsetNum = area.getAllPopulationNumsByStage(OnsetStage.class);
@@ -95,6 +103,7 @@ public class PatientMgr {
                 }
             }
         }
+        Controller.getInstance().addProgress(nNum);
     }
 
     public void calcStages()

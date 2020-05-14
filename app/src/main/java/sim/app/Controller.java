@@ -150,7 +150,7 @@ public class Controller {
         doTransfer();
 
         //模拟感染的过程，更新各种人群的人数
-        if (m_nSimDays<=65)
+        //if (m_nSimDays<=65)
         {
             //某个时刻停止传染，用于查看长期死亡率
             setProgress("模拟感染的过程", 0);

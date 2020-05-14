@@ -32,6 +32,29 @@ public class PolicyMgr {
         {
             onePolicy.checkUsable();
         }
+    }
 
+    public boolean isPolicyActive(Class policyClass)
+    {
+        PolicyBase policy = getOnePolicy(policyClass);
+
+        if (policy == null)
+        {
+            return false;
+        }
+
+        return policy.isActive();
+    }
+
+    public PolicyBase getOnePolicy(Class policyClass)
+    {
+        for (PolicyBase onePolicy : m_PolicySet)
+        {
+            if (onePolicy.getClass() == policyClass)
+            {
+                return onePolicy;
+            }
+        }
+        return null;
     }
 }

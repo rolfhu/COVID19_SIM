@@ -1,7 +1,9 @@
 package sim.substance;
 
 import sim.app.Controller;
+import sim.app.PolicyMgr;
 import sim.app.TagMgr;
+import sim.policy.quarantine.PolicyVillageQuarantine;
 import sim.tags.stage.IntensiveStage;
 import sim.worlds.FactoryMgr;
 import sim.tags.ITagHost;
@@ -115,7 +117,7 @@ public class Patient implements ITagHost {
     //获取今日传染力度，0为最低，1为100%传染1人，超过1为可能传染多人
     //传染力度是根据此人本身的属性、所感染的病毒、病程的阶段、发病的严重程度进行计算
     //不包括外部的干预政策
-    public float getInfectionPower()
+    private float getInfectionPower()
     {
         if (m_Stage == null)
         {
@@ -133,6 +135,24 @@ public class Patient implements ITagHost {
             fResult = 3;
         }
         return fResult;
+    }
+
+    public float getInfectionPowerByPolicy()
+    {
+        float fInfectionPower = getInfectionPower();
+
+        if (m_Hospital != null)
+        {
+            //住进医院认为不再传染
+            return 0;
+        }
+
+        if (PolicyMgr.getInstance().isPolicyActive(PolicyVillageQuarantine.class))
+        {
+            fInfectionPower /= 5;
+        }
+
+        return fInfectionPower;
     }
 
     //计算病人有机会发生多少次传播
@@ -188,6 +208,12 @@ public class Patient implements ITagHost {
 
         m_CalcedDay = Controller.getInstance().getSimDays();
         m_DaysInStage++;
+
+        if (m_DaysInStage >= 50)
+        {
+            int i=0;
+            i++;
+        }
 
         //先计算各项参数值的变化
         calcProps();

@@ -3,6 +3,7 @@ package sim.area;
 import android.util.Log;
 import android.util.Pair;
 
+import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,7 +13,9 @@ import java.util.Map;
 
 import sim.app.AreaMgr;
 import sim.app.Controller;
+import sim.app.PolicyMgr;
 import sim.app.PopulationMgr;
+import sim.policy.quarantine.PolicyLockCity;
 import sim.strategy.quarantine.AreaQuarantineStrategy;
 import sim.strategy.quarantine.IAreaQuarantineStrategy;
 import sim.substance.AreaHospital;
@@ -150,7 +153,14 @@ public class Area {
 
     public float getTransferRate()
     {
-        return m_fTransferRate;
+        float fResult = m_fTransferRate;
+
+        //封城模式下，减少人口流动
+        if (PolicyMgr.getInstance().isPolicyActive(PolicyLockCity.class))
+        {
+            fResult /= 100;
+        }
+        return fResult;
     }
 
     public void setTransferToParentRate(float fTransferToParentRate)
